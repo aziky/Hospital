@@ -1,9 +1,12 @@
 package tool;
 
 import employee.Employee;
+
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.List;
+import java.util.Scanner;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -12,12 +15,6 @@ public class EmployeeManage implements IEmployeeManage {
     private List<Employee> listEmployees = new ArrayList<>();
     Validation valid = new Validation();
     SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
-
-
-
-    public List<Employee> getListEmployees() {
-        return listEmployees;
-    }
 
     public Employee inputEmployee() throws IOException {
         String ID = valid.checkID("Enter ID (Press Enter to return to the menu): ", listEmployees);
@@ -153,7 +150,95 @@ public class EmployeeManage implements IEmployeeManage {
     }
 
     @Override
-    public void updateEmployee() {
+    public void updateEmployee() throws FileNotFoundException, IOException {
+        Scanner sc = new Scanner(System.in);
+        int choice;
+        int indexID = valid.checkUpdateID("Enter ID", listEmployees);
+        if (indexID != -1) {
+            do {
+                System.out.println("1. Update name: ");
+                System.out.println("2. Update phone");
+                System.out.println("3. Update birthday");
+                System.out.println("4. Update role");
+                System.out.println("5. Update contract time");
+                System.out.println("6. Exit");
+                System.out.println("Enter your choice: ");
+                choice = sc.nextInt();
+                switch (choice) {
+                    case 1:
+                        String name = valid.checkName("Enter name to update (Press Enter to cancel update): ");
+                        if (name.isEmpty()) {
+                            if (valid.askToContinue()) {
+                                updateEmployee();
+                            } else {
+                                System.out.println("Updating employees canceled.");
+                                return;
+                            }
+                        }
+                        listEmployees.get(indexID).setName(name);
+                        break;
+                    case 2:
+                        String phone = valid.checkPhone("Enter phone to update (Press Enter to cancel update): ");
+                        if (phone.isEmpty()) {
+                            if (valid.askToContinue()) {
+                                updateEmployee();
+                            } else {
+                                System.out.println("Updating employees canceled.");
+                                return;
+                            }
+                        }
+                        listEmployees.get(indexID).setPhone(phone);
+
+                        break;
+                    case 3:
+                        Date bDate = valid.checkDate("Enter birthday to update (Press Enter to cancel update): ");
+                        if (bDate.toString().isEmpty()) {
+                            if (valid.askToContinue()) {
+                                updateEmployee();
+                            } else {
+                                System.out.println("Updating employees canceled.");
+                                return;
+                            }
+                        }
+                        listEmployees.get(indexID).setbDate(bDate);
+                        break;
+                    case 4:
+                        String role = valid.checkRole("Enter role to update (Press Enter to cancel update): ");
+                        if (role.isEmpty()) {
+                            if (valid.askToContinue()) {
+                                updateEmployee();
+                            } else {
+                                System.out.println("Updating employees canceled.");
+                                return;
+                            }
+                        }
+                        listEmployees.get(indexID).setRole(role);
+                        break;
+                    case 5:
+                        int contractTime = valid
+                                .checkInt("Enter contract time to update (Press Enter to cancel update): ", "contract");
+                        if (contractTime == -1) {
+                            if (valid.askToContinue()) {
+                                updateEmployee();
+                            } else {
+                                System.out.println("Updating employees canceled.");
+                                return;
+                            }
+                        }
+                        listEmployees.get(indexID).setContractTime(contractTime);
+
+                        break;
+                    default:
+                        System.err.println("Please try again! Input from 1 to 6");
+                        break;
+                }
+            } while (choice != 6);
+        } else {
+            System.out.println("ID not found!");
+            sc.close();
+            return;
+        }
+        sc.close();
 
     }
 

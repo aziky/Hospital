@@ -1,5 +1,8 @@
 package tool;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+
 /**
  *
  * @author pcm23
@@ -12,7 +15,7 @@ public interface IEmployeeManage {
 
     void removeEmployee();
 
-    void updateEmployee();
+    void updateEmployee() throws FileNotFoundException, IOException;
 
     void viewAllList();
 

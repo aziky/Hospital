@@ -62,20 +62,39 @@ public class Validation {
                 continue;
             }
             boolean isUnique = true;
-            for (Employee e : exList){
-                if (ID.equalsIgnoreCase(e.getID())){
+            for (Employee e : exList) {
+                if (ID.equalsIgnoreCase(e.getID())) {
                     break;
                 }
             }
-
-            if (!isUnique){
+            if (!isUnique) {
                 System.out.println("ID already exists!");
-            }else{
+            } else {
                 break;
             }
-            
+
         }
         return ID;
+    }
+
+    public int checkUpdateID(String msg, List<Employee> list) {
+        while (true) {
+            System.out.print(msg);
+            String ID = sc.nextLine().trim().toUpperCase();
+            
+            if (ID.isEmpty()){
+                System.out.println("Can't not update empty information");
+                continue;
+            }
+
+            for (int i = 0; i < list.size(); i++) {
+                if (ID.equals(list.get(i).getID())){
+                    return i;
+                }
+            }
+
+            return -1;
+        }
     }
 
     public String checkPhone(String msg) {
@@ -205,8 +224,8 @@ public class Validation {
                         continue;
                     }
                     return contractTime;
-                } 
-                 if (type.equals("salary")) {
+                }
+                if (type.equals("salary")) {
                     int salary = Integer.parseInt(inputInt);
                     if (salary < 100 || salary > 8000) {
                         System.err.println("Invalid salary! Your salary must be from 100$ to 8000$");
