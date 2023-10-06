@@ -287,7 +287,7 @@ public class EmployeeManage implements IEmployeeManage {
         System.out.printf("%-15s%-15s%-20s%-20s%-15s%-20s%-15s%-25s%-20s\n", "ID", "NAME", "PHONE", "BIRTHDAY", "ROLE",
                 "HIRED DATE", "SALARY", "CONTRACT TIME", "RESIGN DATE");
         for (Employee e : listEmployees) {
-            if (e.getRole().equalsIgnoreCase(null)) {
+            if (e.getRole().equalsIgnoreCase("doctor")) {
                 printEmployee(e);
             }
         }
@@ -295,14 +295,28 @@ public class EmployeeManage implements IEmployeeManage {
 
     @Override
     public void nurseList() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from
-                                                                       // nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+        System.out.println(
+                "=======================================================================NURSE LIST========================================================================");
+        System.out.printf("%-15s%-15s%-20s%-20s%-15s%-20s%-15s%-25s%-20s\n", "ID", "NAME", "PHONE", "BIRTHDAY", "ROLE",
+                "HIRED DATE", "SALARY", "CONTRACT TIME", "RESIGN DATE");
+        for (Employee e : listEmployees) {
+            if (e.getRole().equalsIgnoreCase("nurse")) { 
+                printEmployee(e);
+            }
+        }
     }
 
     @Override
     public void technicianList() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from
-                                                                       // nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+      System.out.println(
+                "=======================================================================TECHNICIAN LIST========================================================================");
+        System.out.printf("%-15s%-15s%-20s%-20s%-15s%-20s%-15s%-25s%-20s\n", "ID", "NAME", "PHONE", "BIRTHDAY", "ROLE",
+                "HIRED DATE", "SALARY", "CONTRACT TIME", "RESIGN DATE");
+        for (Employee e : listEmployees) {
+            if (e.getRole().equalsIgnoreCase("technician")) {
+                printEmployee(e);
+            }
+        }
     }
 
     @Override
