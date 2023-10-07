@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Scanner;
+import java.util.StringTokenizer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -22,21 +23,7 @@ public class Validation {
     private static final String patternId = "EM\\d{4}";
     private static final String patternPhone = "[0-9]{9,11}";
     private static final String patternDate = "dd-MM-yyy";
-
-    // public static boolean checkContinue = true;
-
-    public boolean checkContinue() {
-        while (true) {
-            System.out.print("Do you want to continue adding: ");
-            String answer = sc.nextLine().toLowerCase();
-            if (answer.equalsIgnoreCase("yes")) {
-                return true;
-            }
-            if (answer.equalsIgnoreCase("no")) {
-                return false;
-            }
-        }
-    }
+    private List<Employee> dataFileList = new ArrayList<>();
 
     public String checkName(String msg) {
         while (true) {
@@ -44,6 +31,16 @@ public class Validation {
             String name = sc.nextLine().trim().toUpperCase();
             if (name.isEmpty()) {
                 return "";
+            }
+            boolean checkName = true;
+            for (int i = 0; i < name.length(); i++) {
+                if (!Character.isLetter(name.charAt(i))) {
+                    checkName = false;
+                }
+            }
+            if (!checkName) {
+                System.out.println("Invalid name! Please try again.");
+                continue;
             }
             return name;
         }
@@ -58,17 +55,18 @@ public class Validation {
                 return "";
             }
             if (!ID.matches(patternId)) {
-                System.err.println("Incorrect format");
+                System.err.println("Incorrect format\n");
                 continue;
             }
             boolean isUnique = true;
+            exList.addAll(dataFileList);
             for (Employee e : exList) {
                 if (ID.equalsIgnoreCase(e.getID())) {
                     break;
                 }
             }
             if (!isUnique) {
-                System.out.println("ID already exists!");
+                System.out.println("ID already exists!\n");
             } else {
                 break;
             }
@@ -81,14 +79,14 @@ public class Validation {
         while (true) {
             System.out.print(msg);
             String ID = sc.nextLine().trim().toUpperCase();
-            
-            if (ID.isEmpty()){
-                System.out.println("Can't not update empty information");
+
+            if (ID.isEmpty()) {
+                System.out.println("Can't not update empty information\n");
                 continue;
             }
 
             for (int i = 0; i < list.size(); i++) {
-                if (ID.equals(list.get(i).getID())){
+                if (ID.equals(list.get(i).getID())) {
                     return i;
                 }
             }
@@ -107,7 +105,7 @@ public class Validation {
             }
 
             if (!phone.matches(patternPhone)) {
-                System.err.println("Invalid! Phone number length has to have 9 to 11 digits");
+                System.err.println("Invalid phone number! Phone number length has to have 9 to 11 digits\n");
                 continue;
             }
             return phone;
@@ -126,10 +124,14 @@ public class Validation {
             SimpleDateFormat sdf = new SimpleDateFormat(patternDate);
 
             try {
-                Date date = sdf.parse(inputDate);
-                return date;
+                Date bDate = sdf.parse(inputDate);
+                if (bDate.after(new Date())) {
+                    System.out.println("Invalid birthday! Your birthday have to before current day.");
+                    continue;
+                }
+                return bDate;
             } catch (ParseException e) {
-                System.err.println("Invalid date! Your date must have this format dd-MM-yyyy");
+                System.err.println("Invalid date! Your birthday must have this format dd-MM-yyyy\n");
             }
         }
     }
@@ -162,7 +164,7 @@ public class Validation {
                 }
             }
             System.out.println("Don't have that role in file roles.txt");
-            System.out.println("Select 1 from these roles " + listRole);
+            System.out.println("Select 1 from these roles " + listRole + "\n");
         }
     }
 
@@ -180,34 +182,18 @@ public class Validation {
 
             try {
                 Date date = sdf.parse(inputDate);
+                if (date.before(bDate)) {
+                    System.out.println("Invalid input! Your hired date must be after your birthday.");
+                    continue;
+                }
                 return date;
             } catch (ParseException e) {
-                System.err.println("Invalid date!");
+                System.err.println("Invalid date!\n");
             }
         }
     }
 
-    public Date checkResignDate(String msg, Date hiredDate) {
-        while (true) {
-            System.out.print(msg);
-            String inputDate = sc.nextLine(); // empty return null;
-
-            if (inputDate.isEmpty()) {
-                return null;
-            }
-
-            SimpleDateFormat sdf = new SimpleDateFormat(patternDate);
-
-            try {
-                Date date = sdf.parse(inputDate);
-                return date;
-            } catch (ParseException e) {
-                System.err.println("Invalid date!");
-            }
-        }
-    }
-
-    public int checkInt(String msg, String type) {
+    public int checkInt(String msg, int min, int max) {
         while (true) {
             System.out.print(msg);
             String inputInt = sc.nextLine().trim();
@@ -217,25 +203,15 @@ public class Validation {
             }
 
             try {
-                int contractTime = Integer.parseInt(inputInt);
-                if (type.equals("contract")) {
-                    if (contractTime < 1 || contractTime > 30) {
-                        System.err.println("Invalid salary! Your contract time must be from 1 to 30 years");
-                        continue;
-                    }
-                    return contractTime;
+                int input = Integer.parseInt(inputInt);
+                if (input < min || input > max) {
+                    System.err.println("Invalid input! Must input from " + min + " to " + max);
                 }
-                if (type.equals("salary")) {
-                    int salary = Integer.parseInt(inputInt);
-                    if (salary < 100 || salary > 8000) {
-                        System.err.println("Invalid salary! Your salary must be from 100$ to 8000$");
-                        continue;
-                    }
-                    return salary;
-                }
+                return input;
             } catch (NumberFormatException e) {
-                System.err.println("Must input a number!");
+                System.err.println("Must input a number!\n");
             }
+
         }
     }
 
@@ -261,6 +237,44 @@ public class Validation {
             }
             return choice.equals("yes");
         }
+    }
+
+    public List<Employee> loadData(List<Employee> list) throws FileNotFoundException, IOException {
+        String line;
+        File file = new File("employees.txt");
+        if (!file.exists()) {
+            file.createNewFile();
+        }
+        BufferedReader br = new BufferedReader(new FileReader(file));
+        while ((line = br.readLine()) != null) {
+            try {
+                SimpleDateFormat sdf = new SimpleDateFormat();
+                StringTokenizer stk = new StringTokenizer(line, ",");
+                String id = stk.nextToken().trim();
+                String name = stk.nextToken().trim();
+                String phone = stk.nextToken().trim();
+                Date bDate = sdf.parse(stk.nextToken().trim());
+                Date hiredDate = sdf.parse(stk.nextToken().trim());
+                String role = stk.nextToken().trim();
+                int salary = Integer.parseInt(stk.nextToken().trim());
+                int contractTime = Integer.parseInt(stk.nextToken().trim());
+                Date resignDate;
+                if (stk.nextToken() == null) {
+                    resignDate = null;
+                } else {
+                    resignDate = sdf.parse(stk.nextToken().trim());
+                }
+                Employee employee = new Employee(id, name, phone, bDate, role, hiredDate, salary, contractTime,
+                        resignDate);
+                dataFileList.add(employee);
+
+            } catch (ParseException e) {
+                System.out.println("Error load data function in validation file");
+            }
+
+        }
+        br.close();
+        return dataFileList;
     }
 
 }

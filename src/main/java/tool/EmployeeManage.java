@@ -2,7 +2,12 @@ package tool;
 
 import employee.Employee;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.List;
@@ -71,7 +76,7 @@ public class EmployeeManage implements IEmployeeManage {
             }
         }
 
-        int salary = valid.checkInt("Enter salary (Press enter to return to the menu): ", "salary");
+        int salary = valid.checkInt("Enter salary (Press enter to return to the menu): ", 100, 8000);
         if (salary == -1) {
             if (valid.askToContinue()) {
                 return inputEmployee();
@@ -80,7 +85,7 @@ public class EmployeeManage implements IEmployeeManage {
             }
         }
 
-        int contractTime = valid.checkInt("Enter contract time (Press enter to return to the menu): ", "contract");
+        int contractTime = valid.checkInt("Enter contract time (Press enter to return to the menu): ", 1, 30);
         if (contractTime == -1) {
             if (valid.askToContinue()) {
                 return inputEmployee();
@@ -114,7 +119,7 @@ public class EmployeeManage implements IEmployeeManage {
     @Override
     public void searchEmployee() {
         if (listEmployees.isEmpty()) {
-            System.out.println("Empty List");
+            System.out.println("Can't search employee because the list is empty");
             return;
         }
 
@@ -133,7 +138,7 @@ public class EmployeeManage implements IEmployeeManage {
     @Override
     public void removeEmployee() {
         if (listEmployees.isEmpty()) {
-            System.out.println("Empty List");
+            System.out.println("Can't remove employees because the list is empty");
             return;
         }
 
@@ -151,6 +156,10 @@ public class EmployeeManage implements IEmployeeManage {
 
     @Override
     public void updateEmployee() throws FileNotFoundException, IOException {
+        if (listEmployees.isEmpty()) {
+            System.out.println("Can't update because the list is empty");
+            return;
+        }
         Scanner sc = new Scanner(System.in);
         int choice;
         int indexID = valid.checkUpdateID("Enter ID", listEmployees);
@@ -215,8 +224,22 @@ public class EmployeeManage implements IEmployeeManage {
                         listEmployees.get(indexID).setRole(role);
                         break;
                     case 5:
+                        int salary = valid
+                                .checkInt("Enter salary to update (Press Enter to cancel update): ", 100, 8000);
+                        if (salary == -1) {
+                            if (valid.askToContinue()) {
+                                updateEmployee();
+                            } else {
+                                System.out.println("Updating employees canceled.");
+                                return;
+                            }
+                        }
+                        listEmployees.get(indexID).setSalary(salary);
+
+                        break;
+                    case 6:
                         int contractTime = valid
-                                .checkInt("Enter contract time to update (Press Enter to cancel update): ", "contract");
+                                .checkInt("Enter contract time to update (Press Enter to cancel update): ", 1, 30);
                         if (contractTime == -1) {
                             if (valid.askToContinue()) {
                                 updateEmployee();
@@ -244,6 +267,10 @@ public class EmployeeManage implements IEmployeeManage {
 
     @Override
     public void viewAllList() {
+        if (listEmployees.isEmpty()) {
+            System.out.println("Can't view the list because it is empty");
+            return;
+        }
         System.out.println(
                 "=======================================================================HOSPITAL LIST========================================================================");
         System.out.printf("%-15s%-15s%-20s%-20s%-15s%-20s%-15s%-25s%-20s\n", "ID", "NAME", "PHONE", "BIRTHDAY", "ROLE",
@@ -256,6 +283,10 @@ public class EmployeeManage implements IEmployeeManage {
 
     @Override
     public void takeOnList() {
+        if (listEmployees.isEmpty()) {
+            System.out.println("Can't view the list because it is empty");
+            return;
+        }
         System.out.println(
                 "=======================================================================WORKING EMPLOYEES========================================================================");
         System.out.printf("%-15s%-15s%-20s%-20s%-15s%-20s%-15s%-25s%-20s\n", "ID", "NAME", "PHONE", "BIRTHDAY", "ROLE",
@@ -269,60 +300,121 @@ public class EmployeeManage implements IEmployeeManage {
 
     @Override
     public void resignList() {
+        if (listEmployees.isEmpty()) {
+            System.out.println("Can't view the list because it is empty");
+            return;
+        }
         System.out.println(
                 "=======================================================================RESIGN EMPLOYEES========================================================================");
         System.out.printf("%-15s%-15s%-20s%-20s%-15s%-20s%-15s%-25s%-20s\n", "ID", "NAME", "PHONE", "BIRTHDAY", "ROLE",
                 "HIRED DATE", "SALARY", "CONTRACT TIME", "RESIGN DATE");
+        boolean check = false;
         for (Employee e : listEmployees) {
             if (e.getResignDate() != null) {
                 printEmployee(e);
+                check = true;
             }
+        }
+
+        if (!check) {
+            System.out.println("No employees resign!");
         }
     }
 
     @Override
     public void doctorList() {
+        if (listEmployees.isEmpty()) {
+            System.out.println("Can't view the doctor list because it is empty");
+            return;
+        }
         System.out.println(
                 "=======================================================================DOCTOR LIST========================================================================");
         System.out.printf("%-15s%-15s%-20s%-20s%-15s%-20s%-15s%-25s%-20s\n", "ID", "NAME", "PHONE", "BIRTHDAY", "ROLE",
                 "HIRED DATE", "SALARY", "CONTRACT TIME", "RESIGN DATE");
+
+        boolean check = false;
         for (Employee e : listEmployees) {
             if (e.getRole().equalsIgnoreCase("doctor")) {
                 printEmployee(e);
+                check = true;
             }
+        }
+
+        if (!check) {
+            System.out.println("No doctor in the hospital");
         }
     }
 
     @Override
     public void nurseList() {
+        if (listEmployees.isEmpty()) {
+            System.out.println("Can't view the nurse list because it is empty");
+            return;
+        }
         System.out.println(
                 "=======================================================================NURSE LIST========================================================================");
         System.out.printf("%-15s%-15s%-20s%-20s%-15s%-20s%-15s%-25s%-20s\n", "ID", "NAME", "PHONE", "BIRTHDAY", "ROLE",
                 "HIRED DATE", "SALARY", "CONTRACT TIME", "RESIGN DATE");
+        boolean check = false;
         for (Employee e : listEmployees) {
-            if (e.getRole().equalsIgnoreCase("nurse")) { 
+            if (e.getRole().equalsIgnoreCase("nurse")) {
                 printEmployee(e);
+                check = true;
             }
+        }
+
+        if (!check) {
+            System.out.println("No nurse in the hospital");
         }
     }
 
     @Override
     public void technicianList() {
-      System.out.println(
+        if (listEmployees.isEmpty()) {
+            System.out.println("Can't view the technician list because it is empty");
+            return;
+        }
+        System.out.println(
                 "=======================================================================TECHNICIAN LIST========================================================================");
         System.out.printf("%-15s%-15s%-20s%-20s%-15s%-20s%-15s%-25s%-20s\n", "ID", "NAME", "PHONE", "BIRTHDAY", "ROLE",
                 "HIRED DATE", "SALARY", "CONTRACT TIME", "RESIGN DATE");
+
+        boolean check = false;
         for (Employee e : listEmployees) {
             if (e.getRole().equalsIgnoreCase("technician")) {
                 printEmployee(e);
+                check = true;
             }
+        }
+
+        if (!check) {
+            System.out.println("No technician in the hospital");
         }
     }
 
     @Override
-    public void writeToFile() {
-        throw new UnsupportedOperationException("Not supported yet."); // Generated from
-                                                                       // nbfs://nbhost/SystemFileSystem/Templates/Classes/Code/GeneratedMethodBody
+    public void writeToFile() throws FileNotFoundException, IOException {
+        if (listEmployees.isEmpty()) {
+            System.out.println("Can't write to file because the list is empty");
+            return;
+        }
+        File file = new File("employees.txt");
+        if (!file.exists()){
+            file.createNewFile();
+        }
+        StringBuilder data = new StringBuilder();
+        
+        List<Employee> dataEmployees = valid.loadData(listEmployees);
+        dataEmployees.addAll(listEmployees);
+        for (Employee e : dataEmployees) {
+            data.append(e.toString()).append("\n");
+        }
+
+        BufferedWriter bw = new BufferedWriter(new FileWriter(file));
+        bw.write(data.toString());
+        bw.close();
+
+        System.out.println("Successful wrote to file");
     }
 
     public void printEmployee(Employee p) {

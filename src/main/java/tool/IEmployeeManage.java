@@ -29,7 +29,7 @@ public interface IEmployeeManage {
     
     void technicianList();
     
-    void writeToFile();
+    void writeToFile() throws FileNotFoundException, IOException;
     
 
 }
