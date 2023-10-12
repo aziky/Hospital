@@ -5,8 +5,9 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -28,7 +29,7 @@ public class Validation {
     public String checkName(String msg) {
         while (true) {
             System.out.print(msg);
-            String name = sc.nextLine().trim().toUpperCase();
+            String name = sc.next().trim().toUpperCase();
             if (name.isEmpty()) {
                 return "";
             }
@@ -62,17 +63,16 @@ public class Validation {
             exList.addAll(dataFileList);
             for (Employee e : exList) {
                 if (ID.equalsIgnoreCase(e.getID())) {
+                    isUnique = false;
                     break;
                 }
             }
             if (!isUnique) {
                 System.out.println("ID already exists!\n");
-            } else {
-                break;
+            } else { 
+                return ID;
             }
-
         }
-        return ID;
     }
 
     public int checkUpdateID(String msg, List<Employee> list) {
@@ -115,25 +115,48 @@ public class Validation {
     public Date checkDate(String msg) {
         while (true) {
             System.out.print(msg);
-            String inputDate = sc.nextLine(); // empty return null;
+            String inputDate = sc.nextLine();
 
             if (inputDate.isEmpty()) {
                 return null;
             }
-
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern(patternDate);
             SimpleDateFormat sdf = new SimpleDateFormat(patternDate);
 
             try {
-                Date bDate = sdf.parse(inputDate);
-                if (bDate.after(new Date())) {
+                LocalDate birthday = LocalDate.parse(inputDate, formatter);
+                LocalDate now = LocalDate.now();
+                int age = checkAge(birthday, now);
+
+                if (birthday.isAfter(now)) {
                     System.out.println("Invalid birthday! Your birthday have to before current day.");
                     continue;
                 }
+                if (age < 18 || age > 60) {
+                    System.out.println("You aren't in the range age to work");
+                    continue;
+                }
+
+                Date bDate = sdf.parse(inputDate);
                 return bDate;
-            } catch (ParseException e) {
+            } catch (Exception e) {
                 System.err.println("Invalid date! Your birthday must have this format dd-MM-yyyy\n");
             }
         }
+    }
+
+    private int checkAge(LocalDate birthday, LocalDate now) {
+        int years = now.getYear() - birthday.getYear();
+        int currentMonth = now.getMonthValue();
+        int birthdayMonth = birthday.getMonthValue();
+        int currentDay = now.getDayOfMonth();
+        int birthDay = birthday.getDayOfMonth();
+
+        if (currentMonth < birthdayMonth || (currentMonth == birthdayMonth && currentDay < birthDay)) {
+            years--;
+        }
+
+        return years;
     }
 
     public String checkRole(String msg) throws FileNotFoundException, IOException {
@@ -179,16 +202,22 @@ public class Validation {
             }
 
             SimpleDateFormat sdf = new SimpleDateFormat(patternDate);
-
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern(patternDate);
             try {
-                Date date = sdf.parse(inputDate);
-                if (date.before(bDate)) {
-                    System.out.println("Invalid input! Your hired date must be after your birthday.");
+                LocalDate hDate = LocalDate.parse(inputDate, formatter);
+                LocalDate now = LocalDate.now();
+                if (hDate.isAfter(now)) {
+                    System.out.println(
+                            "Invalid input! Hired date must be before current day.");
                     continue;
                 }
+                Date date = sdf.parse(inputDate);
+                if (bDate.before(bDate)){
+                    System.out.println("Invalid input! Hired date must be after birthday ");
+                }
                 return date;
-            } catch (ParseException e) {
-                System.err.println("Invalid date!\n");
+            } catch (Exception e) {
+                System.err.println("Invalid date! Your birthday must have this format dd-MM-yyyy");
             }
         }
     }
@@ -227,18 +256,6 @@ public class Validation {
         }
     }
 
-    public boolean askResignDate() {
-        while (true) {
-            System.out.print("Does this employee have a resign date (yes/no)");
-            String choice = sc.nextLine().trim().toLowerCase();
-            if (!choice.equals("no") && !choice.equals("yes")) {
-                System.err.println("Must input \"yes\" or \"no\"!");
-                continue;
-            }
-            return choice.equals("yes");
-        }
-    }
-
     public List<Employee> loadData(List<Employee> list) throws FileNotFoundException, IOException {
         String line;
         File file = new File("employees.txt");
@@ -268,7 +285,7 @@ public class Validation {
                         resignDate);
                 dataFileList.add(employee);
 
-            } catch (ParseException e) {
+            } catch (Exception e) {
                 System.out.println("Error load data function in validation file");
             }
 
